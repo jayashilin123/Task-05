@@ -1,0 +1,13 @@
+Protein,Method,Correct
+Ubiquitin,CFAVG,0.467
+Ubiquitin,GOR,0.645
+Ubiquitin,PHD,0.868
+DeoxyHb,CFAVG,0.472
+DeoxyHb,GOR,0.844
+DeoxyHb,PHD,0.879
+Rab5c,CFAVG,0.405
+Rab5c,GOR,0.604
+Rab5c,PHD,0.787
+Prealbumin,CFAVG,0.449
+Prealbumin,GOR,0.772
+Prealbumin,PHD,0.78
