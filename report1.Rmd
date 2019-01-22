@@ -6,9 +6,9 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-## Statitical test
 
 ### Load the data
+##### Dataset courtesy: Course material, Professional Certificate in Data Science, Harvardx, Edx
 ```{r}
 load("rdas/research_funding_rates.rda") 
 ```

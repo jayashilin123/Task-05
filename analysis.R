@@ -2,7 +2,8 @@ library(ggplot2)
 load("rdas/research_funding_rates.rda") 
 research_funding_rates
 boxplot(research_funding_rates$success_rates_total,research_funding_rates$success_rates_men, 
-     research_funding_rates$success_rates_women)
+     research_funding_rates$success_rates_women, xlab=c("Total, Men, Women"), 
+     main ="Research funding success rates")
 ggsave("figs/plot001.png")
 summary(research_funding_rates)
 
