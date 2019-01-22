@@ -1,0 +1,24 @@
+---
+title: "Statistical Tests"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Statitical test
+
+### Load the data
+```{r}
+load("rdas/research_funding_rates.rda") 
+```
+```{r}
+research_funding_rates
+```
+
+### Plot funding success rates: Total, Men, Women
+```{r}
+boxplot(research_funding_rates$success_rates_total,research_funding_rates$success_rates_men, 
+     research_funding_rates$success_rates_women)
+```
+
