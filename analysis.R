@@ -92,12 +92,33 @@ mcnemar.exact(x)
 # from 900 plants, 625 of which have purple flowers, and the remainder (275) have white flowers. 
 # x=number of successes (purple flowers), n=total in sample, and p=proportion of successes to be tested (3/4).
 # H0 = proportion =3/4, H1= proportion not equal to 3/4
-binom.test(x=625,n=900,p=3/4) 
+binom.test(x=625,n=900,p=3/4) #exact test of a binomial hypothesis, usually done when 
+# sample with small sample size.
 # the 95% confidence interval for the proportion of successes being between 0.663 and 0.724, with the hypothesized 
 # value of 0.75 lying outside the 95% confidence interval. p-value <0.05, H0 is rejected. says there is a statistical 
 # diff in the observed and expected proportions of flowers.
-
+prop.test(x=625, n=900, p = 3/4, alternative = "two.sided",
+          correct = TRUE) # when N>30
+# The function returns the value of Pearson's chi-squared test statistic, a p-value, a 95% 
+# confidence intervals, an estimated probability of success
 ###################################################################################################################
+# Two proportion sample test
+# Compare the proportions of smokers in the two groups of individuals: different or same
+# lung cancer = 500, smokers = 490
+# healthy = 500, smokers = 400
+prop.test(x = c(490, 400), n = c(500, 500)) # p-value<0.05, there is difference between groups
+
+prop.test(x = c(490, 400), n = c(500, 500),
+          alternative = "less")  # p-value>0.05, cancer group is not having less proportion of 
+# smokers than healthy
+
+prop.test(x = c(490, 400), n = c(500, 500),
+          alternative = "greater") # p-value<0.05 cancer group has more proportion of smokers
+# than healthy groups. It can be concluded that smoking increase the chances for lung cancer.
+# standard chi-square test in chisq.test() is exactly equivalent to prop.test() but it works 
+# with data in matrix form.
+
+#############################################
 
 load("rdas/geHTdata.rda")
 #create data vector of all control data 
@@ -343,3 +364,25 @@ PT
 
 #########################################################################
 
+# Survival Analysis
+# suvival analysis in R Ani Katchova
+library(survival)
+load("rdas/survival.rda")
+
+head(survival)
+str(survival)
+summary(survival)
+
+# Kaplan-Meier non-parametric analysis 
+kmsurvival <- survfit(Surv(survival$Time, survival$Outcome) ~1)
+summary(kmsurvival)
+plot(kmsurvival, xlabs="Time", ylab="Survival Probability")
+
+# Kaplan-Meier non-parametric analysis by group
+kmsurvival_grp <- survfit(Surv(survival$Time, survival$Outcome) ~ survival$Group)
+summary(kmsurvival_grp)
+plot(kmsurvival_grp, xlab="Time", ylab="Survival Probability")
+
+# Cox proprtional hazard model - coefficients and hazard rates
+coxph <- coxph(Surv(survival$Time, survival$Outcome) ~ survival$Group, method = "breslow")
+summary(coxph)
