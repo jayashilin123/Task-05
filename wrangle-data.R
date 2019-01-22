@@ -28,3 +28,7 @@ save(reactionR, file = "rdas/reactionR.rda")
 # loading file in to R
 Data <- read.csv("data/instructor_rating.csv")
 save(Data, file= "rdas/Data.rda")
+
+# loading file in to R
+survival <- read.csv("data/Survival.csv")
+save(survival, file = "rdas/survival.rda")
