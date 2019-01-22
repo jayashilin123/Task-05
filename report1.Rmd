@@ -8,7 +8,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ### Load the data
-##### Dataset courtesy: Course material, Professional Certificate in Data Science, Harvardx, Edx
+####### Dataset courtesy: Professional Certificate in Data Science, Harvardx, Edx
 ```{r}
 load("rdas/research_funding_rates.rda") 
 ```
@@ -19,6 +19,7 @@ research_funding_rates
 ### Plot funding success rates: Total, Men, Women
 ```{r}
 boxplot(research_funding_rates$success_rates_total,research_funding_rates$success_rates_men, 
-     research_funding_rates$success_rates_women)
+     research_funding_rates$success_rates_women, xlab=c("Total, Men, Women"), 
+     main ="Research funding success rates")
 ```
 
