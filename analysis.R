@@ -388,13 +388,13 @@ summary(survival)
 kmsurvival <- survfit(Surv(survival$Time, survival$Outcome) ~1)
 summary(kmsurvival)
 plot(kmsurvival, xlab="Time", ylab="Survival Probability")
-     
+ggsave("figs/plot004.png")    
 # Kaplan-Meier non-parametric analysis by group
 kmsurvival_grp <- survfit(Surv(survival$Time, survival$Outcome) ~ survival$Group)
 summary(kmsurvival_grp)
 plot(kmsurvival_grp,conf.int=FALSE,col=c("Red","Blue"),xlab="Time", ylab="Survival Probability")
 legend("bottomleft", c("Group0", "Group1"), col=c("Red","Blue"), lty = 1)
-
+ggsave("figs/plot0005.png")
 # Cox proprtional hazard model - coefficients and hazard rates
 coxph <- coxph(Surv(survival$Time, survival$Outcome) ~ survival$Group, method = "breslow")
 summary(coxph)

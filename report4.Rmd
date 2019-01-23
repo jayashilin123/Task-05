@@ -1,0 +1,56 @@
+---
+title: 'Survival Analysis'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+library(survival)
+```
+
+```{r}
+load("rdas/survival.rda")
+head(survival)
+```
+
+```{r}
+str(survival)
+```
+
+```{r}
+summary(survival)
+```
+
+### Kaplan-Meier non-parametric analysis
+
+```{r}
+kmsurvival <- survfit(Surv(survival$Time, survival$Outcome) ~1)
+summary(kmsurvival)
+```
+
+```{r}
+plot(kmsurvival, xlab="Time", ylab="Survival Probability")
+```
+
+### Kaplan-Meier non-parametric analysis by group
+
+```{r}
+kmsurvival_grp <- survfit(Surv(survival$Time, survival$Outcome) ~ survival$Group)
+summary(kmsurvival_grp)
+```
+
+```{r}
+plot(kmsurvival_grp,conf.int=FALSE,col=c("Red","Blue"),xlab="Time", ylab="Survival Probability")
+legend("bottomleft", c("Group0", "Group1"), col=c("Red","Blue"), lty = 1)
+```
+
+
+### Cox proprtional hazard model - coefficients and hazard rates
+
+```{r}
+coxph <- coxph(Surv(survival$Time, survival$Outcome) ~ survival$Group, method = "breslow")
+summary(coxph)
+```

@@ -1,0 +1,258 @@
+---
+title: 'Statistical tests'
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## One sample Wilcoxon Test
+
+Wilcoxon's rank sum test (also known as the unpaired Wilcoxon rank sum test or the Mann-Whitney U test)	It is the test for ordinal or continuous data. In contrast to Student's t-test, does not require the data to be normally distributed. This test too can be used for paired or unpaired data.
+
+Dataset shows different method for identifying protiens and the accuracy.
+```{r}
+load("rdas/protStruct.rda")
+head(protStruct)
+```
+
+```{r}
+str(protStruct)
+```
+
+Test against a specific hypothesis, mean =0.5
+```{r}
+wilcox.test(protStruct$Correct,mu=0.5) 
+```
+
+The results of this test concur with the results of the t-test that the central measure (mean or median) of the data differs significantly from 0.5. 
+
+## Two sample Wilcoxon Rank Sum Tests
+Load the data
+
+Dataset includes info on effectivesness of 2 painkillers as rated by patients
+```{r}
+load("rdas/medrank.rda")
+medrank
+```
+
+```{r include=FALSE}
+library(dplyr)
+```
+
+```{r}
+group_by(medrank, Drug) %>%
+  summarise(
+    count = n(),
+    medi_score = median(Score, na.rm = TRUE),
+    IQR_score = IQR(Score, na.rm = TRUE),
+    medi_rank = median(Rank, na.rm = TRUE),
+    IQR_rank = IQR(Rank, na.rm = TRUE)
+  )
+```
+
+```{r}
+oxycodone_rank <- medrank$Rank[medrank$Drug=="Oxycodone"]
+ibuprofen_rank <- medrank$Rank[medrank$Drug=="Ibuprofen"]
+```
+
+Test the 2 drugs
+```{r}
+relation <- wilcox.test(oxycodone_rank, ibuprofen_rank)
+relation
+```
+
+No difference between the median of 2 groups
+
+
+## Unpaired Wilcoxon Rank Sum Tests
+
+Load the data
+```{r}
+load("rdas/my_data.rda")
+head(my_data)
+```
+
+```{r}
+group_by(my_data, group) %>%
+  summarise(
+    count = n(),
+    median = median(weight, na.rm = TRUE),
+    IQR = IQR(weight, na.rm = TRUE)
+  )
+
+```
+
+```{r include=FALSE}
+library("ggpubr")
+```
+
+```{r}
+ggboxplot(my_data, x = "group", y = "weight", 
+          color = "group", palette = c("#00AFBB", "#E7B800"),
+          ylab = "Weight", xlab = "Groups")
+```
+
+###  Compute two-samples Wilcoxon test - Method 1
+
+```{r}
+women_weight <- my_data$weight[my_data$group=="Woman"]
+men_weight <- my_data$weight[my_data$group=="Man"]
+res <- wilcox.test(women_weight, men_weight)
+res
+```
+
+
+### Compute two-samples Wilcoxon test - Method 2
+
+```{r}
+res <- wilcox.test(weight ~ group, data = my_data,
+                   exact = FALSE)
+res
+```
+
+To test whether the median men's weight is less than the median women's weight:
+```{r}
+wilcox.test(weight ~ group, data = my_data, 
+            exact = FALSE, alternative = "less")
+```
+
+To test whether the median men's weight is greater than the median women's weight
+```{r}
+wilcox.test(weight ~ group, data = my_data,
+            exact = FALSE, alternative = "greater")
+```
+
+
+## Pairwise Wilcoxon Rank Sum Tests
+
+Load the data
+```{r}
+attach(airquality)
+head(airquality)
+```
+
+```{r}
+Month <- factor(Month, labels = month.abb[5:9])
+```
+
+```{r}
+pairwise.wilcox.test(Ozone, Month)
+```
+These give warnings because of ties
+
+```{r}
+pairwise.wilcox.test(Ozone, Month, p.adj = "bonf")
+detach()
+```
+
+
+## Krusal Wallis Test
+
+Load the data
+
+Dataset is about the reaction time taken after intake of 3 different drinks
+```{r}
+load("rdas/reactionR.rda")
+str(reactionR)
+```
+
+Medians
+```{r}
+tapply(reactionR$ReactionTime, reactionR$Drink, median)
+```
+
+Summary
+```{r}
+Water_summary<-summary(reactionR$ReactionTime[reactionR$Drink=='Water'])
+Coffee_summary<-summary(reactionR$ReactionTime[reactionR$Drink=='Coffee'])
+Alcohol_summary<-summary(reactionR$ReactionTime[reactionR$Drink=='Alcohol'])
+```
+
+```{r}
+compare1<-cbind(Water_summary,Coffee_summary,Alcohol_summary)
+round(compare1,2)
+```
+
+```{r}
+boxplot(reactionR$ReactionTime~reactionR$Drink)
+```
+
+```{r}
+kruskal.test(reactionR$ReactionTime~reactionR$Drink)
+```
+
+The simplest adjustment is the Bonferroni adjustment p.adj='bonferroni' which multiplies each Wilcoxon signed rank p-value by the total number of Wilcoxon tests being carried out (here it is 3) while the exact=F stands for the asymptotic test which allows tied ranks.
+
+Look for which drinks are
+
+```{r}
+pairwise.wilcox.test(reactionR$ReactionTime,reactionR$Drink,p.adj='bonferroni',exact=F)
+```
+
+## Friedman Test
+
+Load the data
+```{r}
+load("rdas/Data.rda")
+str(Data)
+```
+
+```{r}
+Data$Likert.f <- as.factor(Data$Likert)
+XT <- xtabs( ~ Instructor + Likert.f,
+             data = Data)
+XT
+```
+
+As proportions
+```{r}
+prop.table(XT, 
+           margin = 1)
+```
+
+```{r include=FALSE}
+library(lattice)
+```
+
+```{r}
+histogram(~ Likert.f | Instructor,
+          data=Data,
+          layout=c(1,5)      #  columns and rows of individual plots
+)
+```
+
+
+```{r}
+friedman.test(Likert ~ Instructor | Rater,
+              data = Data)
+
+```
+
+Also done as
+```{r}
+friedman.test(Data$Likert, Data$Instructor, Data$Rater)
+```
+
+```{r}
+Ratertable <- xtabs(Likert ~ Instructor + Rater, 
+                    data = Data)
+```
+
+Can do rowmeans of ratertable to see the difference in mean ratings,the diff is tested statistically by friedmantest
+
+### Conover test
+
+```{r include=FALSE}
+library(PMCMR)
+```
+
+```{r}
+PT = posthoc.friedman.conover.test(y      = Data$Likert,
+                                   groups = Data$Instructor,
+                                   blocks = Data$Rater,
+                                   p.adjust.method="fdr")
+PT
+```
+
