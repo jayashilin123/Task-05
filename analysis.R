@@ -202,10 +202,16 @@ xbar<-tapply(protStruct$Correct,protStruct$Method,mean)
 s<-tapply(protStruct$Correct,protStruct$Method,sd) 
 sem<-s/sqrt(12) 
 arrows(1:3,xbar+2*sem,1:3,xbar-2*sem,angle=90,code=3) 
-
+ggsave("figs/plot002.png")
 #Two factor ANOVA
 anova(lm(Correct~Method+Protein, data=protStruct)) 
 
+# Based on this analysis the method factor is significant but the protein factor is not. 
+#The F-values are the mean square for the sum of squares for that method divided by the sum of 
+#squares error.  An additional concern with ANOVA models incorporating two or more factors is 
+#the possibility that the factors interact and the interaction of factors is a significant 
+#concern.  The analysis of interactions is not presented here, but this is a point of interest 
+#to note. 
 ##################################################################################
 # One sample Wilcoxon Test
 

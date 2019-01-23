@@ -1,0 +1,178 @@
+---
+title: "Statistical test"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Statistical tests
+
+### One proportion sample test
+
+An experiment crossing flowers of two genotypes that produce progeny with white flowers (recessive) of assumed proportion ¼ and progeny with purple flowers (dominant) of assumed proportion ¾. Test the assumption (null hypothesis) that these proportions are correct given that we have empirical data from 900 plants, 625 of which have purple flowers, and the remainder (275) have white flowers. 
+
+x=number of successes (purple flowers), n=total in sample, and p=proportion of successes to be tested (3/4).
+
+H0 = proportion of success equals 3/4, H1= proportion of success not equal to 3/4
+
+prop.test() and binom.test() are used to compare the proportion. prop.test() is used when sample size is >30. The function returns the value of Pearson's chi-squared test statistic, a p-value, a 95% confidence intervals, an estimated probability of success
+
+
+Binomial test "is an exact test of a simple null hypothesis about the probability of success in a Bernoulli experiment". The exact test of a binomial hypothesis, usually done when sample with small sample size.
+
+```{r}
+prop.test(x=625, n=900, p = 3/4, alternative = "two.sided",
+          correct = TRUE)
+```
+
+```{r}
+binom.test(x=625,n=900,p=3/4) 
+
+```
+ 
+95% confidence interval for the proportion of successes lies between 0.663 and 0.724. Hypothesized value of 0.75 is outside the 95% confidence interval. Also p-value <0.05, H0 is rejected. There is a statistical diff in the observed and expected proportions of flowers.
+
+## Two proportion sample test
+
+Compare the proportions of smokers in the two groups of individuals:
+
+lung cancer = 500, smokers = 490
+
+healthy = 500, smokers = 400
+
+```{r}
+prop.test(x = c(490, 400), n = c(500, 500))
+```
+
+p-value<0.05, It can be concluded that there is difference between groups
+
+Test whether the proportion of smokers is less in the cancer group
+```{r}
+prop.test(x = c(490, 400), n = c(500, 500), alternative = "less") 
+```
+
+p-value>0.05, cancer group is not having less proportion of smokers than healthy
+
+```{r}
+prop.test(x = c(490, 400), n = c(500, 500),
+          alternative = "greater")
+```
+
+p-value<0.05 cancer group has more proportion of smokers than healthy group.
+
+Standard chi-square test in chisq.test() is exactly equivalent to prop.test() but it works with data in matrix form.
+
+## One sample t-Test
+
+The sample mean is tested for a hypothesised value here.
+
+Gene expression of few genes are noted in the dataset
+```{r}
+load("rdas/geHTdata.rda")
+head(geHTdata)
+```
+
+Create data vector of all control data
+```{r}
+controls<-c(geHTdata$c1,geHTdata$c2,geHTdata$c3,geHTdata$c4)
+head(controls)
+```
+
+Perform one-sample t-test to check the true mean of the sample is 2000
+
+H0 is the mean is 2000
+```{r}
+t.test(controls,mu=2000) 
+```
+
+The p-value of 0.03583 rejects the null hypothesis at a critical value (alpha level) of 0.05
+
+
+## Two sample t-test
+
+One sample tested here is the "controls". Create the next sample, "treatment".
+```{r}
+treatments<-c(geHTdata$t1, geHTdata$t2, geHTdata$t3, geHTdata$t4)
+head(treatments)
+```
+
+To compare the sample means of control and treatment
+
+H0 is there is no difference between mean of 2 groups
+```{r}
+t.test(controls,treatments) 
+```
+
+p-value for this test very strongly rejects the null hypothesis that there is no difference between the mean of the treatment group and control group. Some genes exhibit significantly different gene expression levels in treatments n control groups
+
+
+## Paired T test
+
+To compare the paired values of 2 groups, controls and treatments
+```{r}
+t.test(controls,treatments, paired = TRUE) 
+```
+
+The p-value for the test indicates there is a significant difference in gene expression in the paired data of controls and treatments and the null hypothesis is rejected.
+
+## ANOVA 
+One way Analysis of variance compare more than 2 groups, parametric
+
+Load the data
+
+Dataset shows different method for identifying protiens and the accuracy.
+```{r}
+load("rdas/protStruct.rda")
+head(protStruct)
+```
+
+```{r}
+str(protStruct)
+```
+
+One way ANOVA analysis tells us whether there is a significant difference between 3 or more groups at one factor levels
+```{r}
+anova(lm(Correct~Method,data=protStruct)) 
+```
+
+Residuals refers to the sum of squares between by the group name (method row) and the sum of squares within as part of the "residuals" row.
+
+There is difference between the performance of the protein identification methods.
+
+Determine which methods differ with pairwise.t.test function.
+```{r}
+pairwise.t.test(protStruct$Correct,protStruct$Method)
+```
+
+
+No difference between the GOR and PHD methods but that both of these differ significantly from the CF AVG method. 
+
+Pariwise t-test with different method for p-value adjustment, Using false discovery rate fdr
+```{r}
+pairwise.t.test(protStruct$Correct,protStruct$Method,p.adj="fdr")
+```
+
+Graph for ANOVA
+```{r}
+stripchart(Correct~Method, vert=T, data= protStruct)
+title("Comparing Secondary Structure Prediction Methods") 
+#Calculating group means, sd, and sem 
+xbar<-tapply(protStruct$Correct,protStruct$Method,mean) 
+s<-tapply(protStruct$Correct,protStruct$Method,sd) 
+sem<-s/sqrt(12) 
+arrows(1:3,xbar+2*sem,1:3,xbar-2*sem,angle=90,code=3) 
+```
+
+## Two way ANOVA
+
+To compare the groups with 2 factor levels
+```{r}
+anova(lm(Correct~Method+Protein, data=protStruct)) 
+```
+The method factor is significant but the protein factor is not.
+
+
+Ref: Kim Seefeld, MS, M.Ed., Ernst Linder, Ph.D. Statistics Using R  with Biological Examples
+
