@@ -8,6 +8,7 @@ ggsave("figs/plot001.png")
 summary(research_funding_rates)
 
 # Compute the totals that were successful and the totals that were not as follows:
+library(dplyr)
 totals <- research_funding_rates %>%  select(-discipline) %>% summarize_all(funs(sum)) %>%  
   summarize(yes_men = awards_men, no_men = applications_men - awards_men, yes_women = awards_women,              
             no_women = applications_women - awards_women) 
@@ -47,15 +48,17 @@ qchisq(0.95,df=1)
 # so H0 cannot be rejected
 # Conclusion is that ther is no difference between the groups
 # Odds Ratio
-odds_men <- (two_by_two$men[2] / sum(two_by_two$men)) /    (two_by_two$men[1] / sum(two_by_two$men))
-odds_women <- (two_by_two$women[2] / sum(two_by_two$women)) /    (two_by_two$women[1] / sum(two_by_two$women))
+odds_men <- (Observed_data$men[2] / sum(Observed_data$men)) / 
+  (Observed_data$men[1] / sum(Observed_data$men))
+odds_women <- (Observed_data$women[2] / sum(Observed_data$women)) / 
+  (Observed_data$women[1] / sum(Observed_data$women))
 odds_ratio <- odds_men / odds_women
 odds_ratio
 
 # Larger sample size will give lesser p-value but odds ratio remains same 
 # Confidence interval for Odds Ratio
 log_or <- log( odds_men / odds_women ) 
-se <- two_by_two %>%  select(-awarded) %>% summarize(se = sqrt(sum(1/men) + sum(1/women))) %>%  .$se 
+se <- Observed_data %>%  select(-awarded) %>% summarize(se = sqrt(sum(1/men) + sum(1/women))) %>%  .$se 
 ci <- log_or + c(-1,1) * qnorm(0.975) * se 
 ci
 

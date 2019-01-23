@@ -7,10 +7,11 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Chisquare Test
+## Chi-square Test
 
-### Load the data 
-####### Courtesy: Professional Certificate in Data Science, Harvardx, Edx
+Load the data
+
+Courtesy: Professional Certificate in Data Science, Harvardx, Edx
 ```{r}
 load("rdas/research_funding_rates.rda") 
 ```
@@ -18,7 +19,7 @@ load("rdas/research_funding_rates.rda")
 research_funding_rates
 ```
 
-### Plot research funding success rates: Total, Men, Women
+Plot research funding success rates: Total, Men, Women
 ```{r}
 boxplot(research_funding_rates$success_rates_total,research_funding_rates$success_rates_men, 
      research_funding_rates$success_rates_women, xlab=c("Total, Men, Women"), 
@@ -29,7 +30,11 @@ boxplot(research_funding_rates$success_rates_total,research_funding_rates$succes
 summary(research_funding_rates)
 ```
 
-### Compute the totals that were successful and the totals that were not as follows:
+Compute the totals that were successful and the totals that were not as follows:
+```{r include=FALSE}
+library(dplyr)
+```
+
 ```{r}
 totals <- research_funding_rates %>%  select(-discipline) %>% summarize_all(funs(sum)) %>%  
   summarize(yes_men = awards_men, no_men = applications_men - awards_men, yes_women = awards_women,              
@@ -37,21 +42,22 @@ totals <- research_funding_rates %>%  select(-discipline) %>% summarize_all(funs
 totals
 ```
 
-### Larger percent of men than women received awards
+Larger percent of men than women received awards
 ```{r}
 totals %>% summarize(percent_men = yes_men/(yes_men+no_men),                      
                        percent_women = yes_women/(yes_women+no_women)) 
 ```
 
-### Percent funding when randomly assigned
+Percent funding when randomly assigned
 ```{r}
 funding_rate <- totals %>%  summarize(percent_total = 
                     (yes_men + yes_women)/(yes_men + no_men +yes_women + no_women)) %>% .$percent_total
 funding_rate
 ```
 
-### Chi-square test is to compare any signficant difference between the groups with the help of a two-by-two table
-### Create the two-by-two Observed data table:
+Chi-square test is to compare any signficant difference between the groups with the help of a two-by-two table
+
+Create the two-by-two Observed data table:
 ```{r}
 Observed_data <- data.frame(awarded = c("no", "yes"),                       
                            men = c(totals$no_men, totals$yes_men),                      
@@ -59,7 +65,7 @@ Observed_data <- data.frame(awarded = c("no", "yes"),
 Observed_data
 ```
 
-### Have a look at the two-by-two expected data table:
+Have a look at the two-by-two expected data table:
 ```{r}
 Expected_data <- data.frame(awarded = c("no", "yes"),      
              men = (totals$no_men + totals$yes_men) * c(1 - funding_rate, funding_rate),        
@@ -67,40 +73,48 @@ Expected_data <- data.frame(awarded = c("no", "yes"),
 Expected_data
 ```
 
-### The idea is to compare the observed to expected.
+The idea is to compare the observed to expected.
 ```{r}
 chisq_test <- Observed_data %>% select(-awarded) %>% chisq.test()
 chisq_test
 qchisq(0.95,df=1)
 ```
 
-### H0 is There is no difference beween the groups
-H1 is there is difference between the groups
-Pvalue is >0.05 at 95% significance level. So Ho cannot be rejected.
-The Chisquare value of 3.8111 wont cross the critical value at 95% signifcance level for df=1 is 3.841459, so H0 cannot be rejected
-Conclusion is that ther is no difference between the groups
+H0 is There is no difference beween the groups
 
-## Odds Ratio
+H1 is there is difference between the groups
+
+Pvalue is >0.05 at 95% significance level. So Ho cannot be rejected.
+
+The Chisquare value of 3.8111 wont cross the critical value at 95% signifcance level for df=1 is 3.841459, so H0 cannot be rejected
+
+Conclusion is that there is no difference between the groups
+
+### Odds Ratio
 ```{r}
-odds_men <- (two_by_two$men[2] / sum(two_by_two$men)) / (two_by_two$men[1] / sum(two_by_two$men))
-odds_women <- (two_by_two$women[2] / sum(two_by_two$women)) / (two_by_two$women[1] / sum(two_by_two$women))
+odds_men <- (Observed_data$men[2] / sum(Observed_data$men)) / (Observed_data$men[1] / sum(Observed_data$men))
+odds_women <- (Observed_data$women[2] / sum(Observed_data$women)) / (Observed_data$women[1] / sum(Observed_data$women))
 odds_ratio <- odds_men / odds_women
 odds_ratio
 ```
 
-### Larger sample size will give lesser p-value but odds ratio remains same 
-Confidence interval for Odds Ratio
+Larger sample size will give lesser p-value but odds ratio remains same.
+
+### Confidence interval for Odds Ratio
 
 ```{r}
 log_or <- log( odds_men / odds_women ) 
-se <- two_by_two %>%  select(-awarded) %>% summarize(se = sqrt(sum(1/men) + sum(1/women))) %>%  .$se 
+se <- Observed_data %>%  select(-awarded) %>% summarize(se = sqrt(sum(1/men) + sum(1/women))) %>%  .$se 
 ci <- log_or + c(-1,1) * qnorm(0.975) * se 
 ci
 ```
 
-## Fischer Test
-### Similar to chisquare test used when sample size is very small <5
-### Fisher test with lady tasing tea for milk poured before or after tea was poured.
+
+
+## Fisher's Test
+Similar to chisquare test used when sample size is very small <5
+
+Fisher's test with lady tasing tea for milk poured before or after tea was poured.
 ```{r}
 tab <- matrix(c(3,1,1,3),2,2) 
 rownames(tab)<-c("Poured Before","Poured After") 
@@ -108,29 +122,38 @@ colnames(tab)<-c("Guessed before","Guessed after")
 tab
 ```
 
-### idea is test actual to guess really works or was it just random happening
+Idea is test actual to guess really works or was it just random happening
 ```{r}
 fisher.test(tab)
 fisher.test(tab, alternative="greater") 
 ```
 
-### H0 is that there is no difference
-H1 is that there s difference between groups
-p-value is >0.05 so H0 cannot be rejected. It cannot be said with statistical sig that the lady can actucally guess.
-when sample size increase p-vlaue gets reduced but odd ratio remains same.
+H0 is that there is no difference
 
-## Mcnemar Test
-### Mcnemar test for paired data
+H1 is that there is difference between groups
+
+p-value is >0.05 so H0 cannot be rejected. It cannot be said with statistical sig that the lady can actucally guess.
+
+When sample size increase p-vlaue gets reduced but odd ratio remains same.
+
+
+
+## McNemar Test
+
+McNemar test for paired data
 ```{r}
 x<-matrix(c(21,9,2,12),2,2)
 mcnemar.test(x)
 mcnemar.test(x,correct=FALSE)
 ```
 
-#### The argument correct =FALSE is a logical indicating whether to apply continuity correction when computing the test statistic.
+The argument correct = FALSE is a logical indicating whether to apply continuity correction when computing the test statistic.
+
+```{r, include=FALSE}
+library(exact2x2)
+```
 
 ```{r}
-library(exact2x2)
 mcnemar.exact(x)
 ```
 
