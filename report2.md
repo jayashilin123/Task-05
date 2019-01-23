@@ -1,9 +1,6 @@
 Statistical test
 ================
 
-Statistical tests
------------------
-
 ### One proportion sample test
 
 An experiment crossing flowers of two genotypes that produce progeny with white flowers (recessive) of assumed proportion ¼ and progeny with purple flowers (dominant) of assumed proportion ¾. Test the assumption (null hypothesis) that these proportions are correct given that we have empirical data from 900 plants, 625 of which have purple flowers, and the remainder (275) have white flowers.
