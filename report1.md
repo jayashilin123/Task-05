@@ -6,8 +6,6 @@ Chi-square Test
 
 Load the data
 
-Courtesy : Professional Certificate in Data Science, Harvardx, Edx
-
 ``` r
 load("rdas/research_funding_rates.rda") 
 ```

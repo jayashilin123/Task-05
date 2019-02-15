@@ -137,12 +137,12 @@ head(airquality)
 Month <- factor(Month, labels = month.abb[5:9])
 ```
 
-```{r}
+```{r echo=TRUE, message=FALSE, warning=FALSE}
 pairwise.wilcox.test(Ozone, Month)
 ```
 These give warnings because of ties
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 pairwise.wilcox.test(Ozone, Month, p.adj = "bonf")
 detach()
 ```
